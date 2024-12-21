@@ -4,6 +4,7 @@ import (
 	"gopkg.in/telebot.v4"
 	"time"
 	"wol-e/internal/config"
+	"wol-e/internal/handlers"
 	"wol-e/internal/logger"
 )
 
@@ -21,16 +22,11 @@ func main() {
 	}
 
 	bot.Handle(telebot.OnText, func(context telebot.Context) error {
-		if context.Chat().ID != config.Config.AdminId || context.Sender().ID != config.Config.AdminId {
-			logger.Log.Errorf("unauthorized user - %d - %d", context.Chat().ID, context.Sender().ID)
-		}
+		return handlers.Message(context)
+	})
 
-		switch context.Text() {
-		case "/start":
-			return context.Send("Hello, I'm your WoL bot! Type /help to get started!")
-		}
-
-		return nil
+	bot.Handle(telebot.OnCallback, func(context telebot.Context) error {
+		return handlers.Callback(context)
 	})
 
 	logger.Log.Infof("bot started - https://t.me/%s", bot.Me.Username)

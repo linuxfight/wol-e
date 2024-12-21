@@ -5,6 +5,7 @@ import (
 	probing "github.com/prometheus-community/pro-bing"
 	"net"
 	"wol-e/internal/logger"
+	"wol-e/internal/wol"
 )
 
 type Device struct {
@@ -13,75 +14,87 @@ type Device struct {
 	Mac  string
 }
 
+func (d Device) GenerateBotText() (string, error) {
+	status, err := d.CheckOnline()
+	if err != nil {
+		return "", err
+	}
+	text := "name: " + d.Name + "\n" +
+		"ip/hostname: " + d.Ip + "\n" +
+		"mac: " + d.Mac + "\n"
+	if status == true {
+		text += "status: 🔋"
+	} else {
+		text += "status: 🪫"
+	}
+	return text, nil
+}
+
 func (d Device) CheckOnline() (bool, error) {
 	pinger, err := probing.NewPinger(d.Ip)
 	if err != nil {
+		logger.Log.Errorf("pinger create error: %v", err)
 		return false, err
 	}
+	pinger.SetPrivileged(true)
 	pinger.Count = 3
 
 	err = pinger.Run()
 	if err != nil {
+		logger.Log.Errorf("ping error: %v", err)
 		return false, err
 	}
 	stats := pinger.Statistics()
 
 	logger.Log.Infof("%s - sent: %d, recieved: %d", d.Ip, stats.PacketsSent, stats.PacketsRecv)
 
-	return true, nil
+	return stats.PacketsRecv > 0, nil
 }
 
 func (d Device) TurnOn() error {
-	// Convert MAC address to byte slice
-	mac, err := parseMACAddress(d.Mac)
+	// The address to broadcast to is usually the default `255.255.255.255` but
+	// can be overloaded by specifying an override in the CLI arguments.
+	bcastAddr := fmt.Sprintf("%s:%d", d.Ip, 9)
+	udpAddr, err := net.ResolveUDPAddr("udp", bcastAddr)
+	if err != nil {
+		logger.Log.Errorf("resolve udp error: %v", err)
+		return err
+	}
+
+	// Build the magic packet.
+	mp, err := wol.New(d.Mac)
+	if err != nil {
+		logger.Log.Errorf("new wol error: %v", err)
+		return err
+	}
+
+	// Grab a stream of bytes to send.
+	bs, err := mp.Marshal()
 	if err != nil {
 		return err
 	}
 
-	// Create a magic packet: 6 x 0xFF + 16 x MAC address
-	packet := make([]byte, 102)
-	for i := 0; i < 6; i++ {
-		packet[i] = 0xFF
-	}
-	for i := 6; i < 102; i++ {
-		packet[i] = mac[(i-6)%6]
-	}
-
-	// Resolve broadcast address
-	addr := fmt.Sprintf("%s:9", d.Ip) // Default WOL port is 9
-
-	// Create UDP connection
-	conn, err := net.Dial("udp", addr)
+	// Grab a UDP connection to send our packet of bytes.
+	conn, err := net.DialUDP("udp", nil, udpAddr)
 	if err != nil {
-		logger.Log.Errorf("could not dial UDP connection: %v", err)
+		logger.Log.Errorf("dial udp error: %v", err)
 		return err
 	}
-	defer func(conn net.Conn) {
-		err = conn.Close()
+	defer func(conn *net.UDPConn) {
+		err := conn.Close()
 		if err != nil {
-			logger.Log.Errorf("could not close connection: %v", err)
+			logger.Log.Errorf("close udp error: %v", err)
 		}
 	}(conn)
 
-	// Send the packet
-	_, err = conn.Write(packet)
+	n, err := conn.Write(bs)
+	if err == nil && n != 102 {
+		err = fmt.Errorf("magic packet sent was %d bytes (expected 102 bytes sent)", n)
+	}
 	if err != nil {
-		logger.Log.Errorf("could not send packet: %v", err)
 		return err
 	}
 
-	logger.Log.Infof("WOL packet sent to %s, %s", d.Ip, addr)
+	logger.Log.Infof("Magic packet sent successfully to %s", d.Mac)
 	return nil
-}
-
-// parseMACAddress parses the MAC address string (e.g., "00:11:22:33:44:55") to a byte slice
-func parseMACAddress(mac string) ([]byte, error) {
-	var result []byte
-	_, err := fmt.Sscanf(mac, "%02x:%02x:%02x:%02x:%02x:%02x",
-		&result[0], &result[1], &result[2], &result[3], &result[4], &result[5])
-	if err != nil {
-		logger.Log.Errorf("invalid MAC address: %v", err)
-		return nil, err
-	}
-	return result, nil
 }
