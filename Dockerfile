@@ -55,6 +55,8 @@ RUN --mount=type=cache,target=/var/cache/apk \
         && \
         update-ca-certificates \
 
+ARG UID=0
+
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/bot /bin/
 
