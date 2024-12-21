@@ -1,0 +1,7 @@
+services:
+  bot:
+    image: ghcr.io/linuxfight/wol-e:main
+    volumes:
+      - ./config.yaml:/config.yaml
+    network_mode: host
+    restart: unless-stopped

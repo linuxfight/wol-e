@@ -1,0 +1,12 @@
+compose.yml
+Dockerfile
+.gitignore
+.dockerignore
+config.yaml
+example.config.yaml
+README.md
+.github
+.git
+.idea
+*.exe
+*.dll
