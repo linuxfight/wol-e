@@ -49,7 +49,7 @@ FROM alpine:latest AS final
 # Install any runtime dependencies that are needed to run your application.
 # Leverage a cache mount to /var/cache/apk/ to speed up subsequent builds.
 RUN --mount=type=cache,target=/var/cache/apk \
-    apk --update add \
+    apk --update iputils add \
         ca-certificates \
         tzdata \
         && \
