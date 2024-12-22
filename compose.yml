@@ -4,5 +4,4 @@ services:
     volumes:
       - ./config.yaml:/config.yaml
     network_mode: host
-    user: "root"
     restart: unless-stopped

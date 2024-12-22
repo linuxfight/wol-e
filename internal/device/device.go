@@ -2,7 +2,6 @@ package device
 
 import (
 	"fmt"
-	probing "github.com/prometheus-community/pro-bing"
 	"net"
 	"wol-e/internal/logger"
 	"wol-e/internal/wol"
@@ -14,22 +13,22 @@ type Device struct {
 	Mac  string
 }
 
-func (d Device) GenerateBotText() (string, error) {
-	status, err := d.CheckOnline()
-	if err != nil {
-		return "", err
-	}
+func (d Device) GenerateBotText() string {
+	// status, _ := d.CheckOnline()
 	text := "name: " + d.Name + "\n" +
 		"ip/hostname: " + d.Ip + "\n" +
 		"mac: " + d.Mac + "\n"
-	if status == true {
-		text += "status: 🔋"
-	} else {
-		text += "status: 🪫"
-	}
-	return text, nil
+	/*
+		if status == true {
+			text += "status: 🔋"
+		} else if status == false {
+			text += "status: 🪫"
+		}
+	*/
+	return text
 }
 
+/*
 func (d Device) CheckOnline() (bool, error) {
 	pinger, err := probing.NewPinger(d.Ip)
 	if err != nil {
@@ -50,6 +49,7 @@ func (d Device) CheckOnline() (bool, error) {
 
 	return stats.PacketsRecv > 0, nil
 }
+*/
 
 func (d Device) TurnOn() error {
 	// The address to broadcast to is usually the default `255.255.255.255` but

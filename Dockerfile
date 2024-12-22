@@ -49,13 +49,24 @@ FROM alpine:latest AS final
 # Install any runtime dependencies that are needed to run your application.
 # Leverage a cache mount to /var/cache/apk/ to speed up subsequent builds.
 RUN --mount=type=cache,target=/var/cache/apk \
-    apk --update --no-cache add \
+    apk --update add \
         ca-certificates \
         tzdata \
         && \
-        update-ca-certificates \
+        update-ca-certificates
 
-ARG UID=0
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+USER appuser
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/bot /bin/
