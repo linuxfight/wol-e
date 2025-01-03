@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"gopkg.in/telebot.v4"
 	"strconv"
 	"strings"
@@ -20,7 +21,6 @@ func handlePower(context telebot.Context, target device.Device, callback *telebo
 	})
 }
 
-/*
 func handlePing(context telebot.Context, target device.Device, targetId int, callback *telebot.Callback) error {
 	text := target.GenerateBotText()
 
@@ -51,7 +51,6 @@ func handlePing(context telebot.Context, target device.Device, targetId int, cal
 		ShowAlert:  false,
 	})
 }
-*/
 
 func Callback(context telebot.Context) error {
 	callback := context.Callback()
@@ -87,10 +86,8 @@ func Callback(context telebot.Context) error {
 	}
 
 	switch method {
-	/*
-		case "ping":
-			return handlePing(context, target, deviceId, callback)
-	*/
+	case "ping":
+		return handlePing(context, target, deviceId, callback)
 	case "power":
 		return handlePower(context, target, callback)
 	}

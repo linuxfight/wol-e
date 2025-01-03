@@ -2,7 +2,9 @@ package device
 
 import (
 	"fmt"
+	probing "github.com/prometheus-community/pro-bing"
 	"net"
+	"time"
 	"wol-e/internal/logger"
 	"wol-e/internal/wol"
 )
@@ -14,21 +16,18 @@ type Device struct {
 }
 
 func (d Device) GenerateBotText() string {
-	// status, _ := d.CheckOnline()
+	status, _ := d.CheckOnline()
 	text := "name: " + d.Name + "\n" +
 		"ip/hostname: " + d.Ip + "\n" +
 		"mac: " + d.Mac + "\n"
-	/*
-		if status == true {
-			text += "status: 🔋"
-		} else if status == false {
-			text += "status: 🪫"
-		}
-	*/
+	if status == true {
+		text += "status: 🔋"
+	} else if status == false {
+		text += "status: 🪫"
+	}
 	return text
 }
 
-/*
 func (d Device) CheckOnline() (bool, error) {
 	pinger, err := probing.NewPinger(d.Ip)
 	if err != nil {
@@ -36,7 +35,8 @@ func (d Device) CheckOnline() (bool, error) {
 		return false, err
 	}
 	pinger.SetPrivileged(true)
-	pinger.Count = 3
+	pinger.Count = 5
+	pinger.Timeout = time.Millisecond * 500
 
 	err = pinger.Run()
 	if err != nil {
@@ -49,7 +49,6 @@ func (d Device) CheckOnline() (bool, error) {
 
 	return stats.PacketsRecv > 0, nil
 }
-*/
 
 func (d Device) TurnOn() error {
 	// The address to broadcast to is usually the default `255.255.255.255` but
@@ -95,6 +94,6 @@ func (d Device) TurnOn() error {
 		return err
 	}
 
-	logger.Log.Infof("Magic packet sent successfully to %s", d.Mac)
+	logger.Log.Infof("Magic packet sent successfully to %s - %s", bcastAddr, d.Mac)
 	return nil
 }

@@ -52,8 +52,13 @@ RUN --mount=type=cache,target=/var/cache/apk \
     apk --update add \
         ca-certificates \
         tzdata \
+        libcap-setcap \
         && \
         update-ca-certificates
+
+# Copy the executable from the "build" stage.
+COPY --from=build /bin/bot /bin/
+RUN setcap cap_net_raw+ep /bin/bot
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
@@ -67,9 +72,6 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 USER appuser
-
-# Copy the executable from the "build" stage.
-COPY --from=build /bin/bot /bin/
 
 # What the container should run when it is started.
 ENTRYPOINT [ "/bin/bot" ]

@@ -23,18 +23,16 @@ func handleDevices(context telebot.Context) error {
 	for i, device := range config.Config.Devices {
 		text := device.GenerateBotText()
 		replyMarkup := &telebot.ReplyMarkup{}
-		/*
-			pingButton := telebot.Btn{
-				Text: "🔄",
-				Data: fmt.Sprintf("ping:%d", i),
-			}
-		*/
+		pingButton := telebot.Btn{
+			Text: "🔄",
+			Data: fmt.Sprintf("ping:%d", i),
+		}
 		powerButton := telebot.Btn{
 			Text: "🔌",
 			Data: fmt.Sprintf("power:%d", i),
 		}
-		// replyMarkup.Inline(replyMarkup.Row(pingButton, powerButton))
-		replyMarkup.Inline(replyMarkup.Row(powerButton))
+		replyMarkup.Inline(replyMarkup.Row(pingButton, powerButton))
+		//replyMarkup.Inline(replyMarkup.Row(powerButton))
 		if err := context.Send(text, replyMarkup); err != nil {
 			return err
 		}
