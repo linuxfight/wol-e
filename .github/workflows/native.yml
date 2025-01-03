@@ -36,7 +36,8 @@ jobs:
 
       - name: Build for ${{ matrix.architecture }}
         run: |
-          GOARCH=${{ matrix.architecture }} GOOS=${{ matrix.os }} go build -o wol-e-${{ matrix.architecture }}-${{ matrix.os }} cmd/main.go
+          go mod download -x
+          GOARCH=${{ matrix.architecture }} go build -o wol-e-${{ matrix.architecture }} cmd/main.go
           
       - name: Publish Release
         id: publish_release
@@ -44,7 +45,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: release.tar.gz
+          files: |
+            wol-e-amd64
+            wol-e-arm64
           tag_name: ${{ steps.short_hash.outputs.HASH }}
           name: ${{ github.event.head_commit.message }}
           body: Release for commit ${{ steps.short_hash.outputs.HASH }}
