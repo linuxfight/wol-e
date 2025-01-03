@@ -1,0 +1,50 @@
+name: Build native binaries
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - example.config.yaml
+      - .gitignore
+      - README.md
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        architecture: [ amd64, arm64 ]
+        os: [ linux ]
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Shorten Commit Hash
+        id: short_hash
+        run: echo "HASH=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.23.2'
+
+      - name: Build for ${{ matrix.architecture }}
+        run: |
+          GOARCH=${{ matrix.architecture }} GOOS=${{ matrix.os }} go build -o wol-e-${{ matrix.architecture }}-${{ matrix.os }} cmd/main.go
+          
+      - name: Publish Release
+        id: publish_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: release.tar.gz
+          tag_name: ${{ steps.short_hash.outputs.HASH }}
+          name: ${{ github.event.head_commit.message }}
+          body: Release for commit ${{ steps.short_hash.outputs.HASH }}
