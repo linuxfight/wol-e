@@ -18,10 +18,10 @@ var (
 	Config *AppConfig
 )
 
-func Init() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+func New(configPath string) {
+	logger.Log.Infof("reading config file: %s", configPath)
+
+	viper.SetConfigFile(configPath)
 
 	if err := viper.ReadInConfig(); err != nil {
 		logger.Log.Panicf("failed to read config: %v", err)

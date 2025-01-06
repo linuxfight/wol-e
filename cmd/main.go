@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"gopkg.in/telebot.v4"
 	"time"
 	"wol-e/internal/config"
@@ -12,9 +13,11 @@ func main() {
 	localTime := time.Now()
 	timezone, _ := localTime.Zone()
 
-	logger.New(true, timezone)
+	configPath := flag.String("config", "./config.yaml", "path to a config file, ex. /etc/wol-e/config.yaml")
+	flag.Parse()
 
-	config.Init()
+	logger.New(false, timezone)
+	config.New(*configPath)
 
 	bot, err := telebot.NewBot(*config.Config.BotConfig)
 	if err != nil {
