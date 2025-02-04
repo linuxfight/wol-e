@@ -3,7 +3,7 @@ module wol-e
 go 1.23.2
 
 require (
-	github.com/prometheus-community/pro-bing v0.6.0
+	github.com/prometheus-community/pro-bing v0.6.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
 	gopkg.in/telebot.v4 v4.0.0-beta.4
