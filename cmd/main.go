@@ -2,11 +2,13 @@ package main
 
 import (
 	"flag"
-	"gopkg.in/telebot.v4"
 	"time"
 	"wol-e/internal/config"
 	"wol-e/internal/handlers"
 	"wol-e/internal/logger"
+
+	"gopkg.in/telebot.v4"
+	"gopkg.in/telebot.v4/middleware"
 )
 
 func main() {
@@ -17,19 +19,21 @@ func main() {
 	flag.Parse()
 
 	logger.New(false, timezone)
-	config.New(*configPath)
+	cfg := config.New(*configPath)
 
-	bot, err := telebot.NewBot(*config.Config.BotConfig)
+	bot, err := telebot.NewBot(*cfg.BotConfig)
 	if err != nil {
 		logger.Log.Panicf("error creating new bot: %v", err)
 	}
 
+	bot.Use(middleware.Whitelist())
+
 	bot.Handle(telebot.OnText, func(context telebot.Context) error {
-		return handlers.Message(context)
+		return handlers.Message(context, cfg)
 	})
 
 	bot.Handle(telebot.OnCallback, func(context telebot.Context) error {
-		return handlers.Callback(context)
+		return handlers.Callback(context, cfg)
 	})
 
 	logger.Log.Infof("bot started - https://t.me/%s", bot.Me.Username)

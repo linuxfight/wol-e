@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"gopkg.in/telebot.v4"
 	"wol-e/internal/config"
-	"wol-e/internal/logger"
+
+	"gopkg.in/telebot.v4"
 )
 
 func handleStart(context telebot.Context) error {
@@ -19,8 +19,8 @@ func handleHelp(context telebot.Context) error {
 	return context.Send(text)
 }
 
-func handleDevices(context telebot.Context) error {
-	for i, device := range config.Config.Devices {
+func handleDevices(context telebot.Context, cfg *config.Data) error {
+	for i, device := range cfg.Devices {
 		text := device.GenerateBotText()
 		replyMarkup := &telebot.ReplyMarkup{}
 		pingButton := telebot.Btn{
@@ -40,22 +40,14 @@ func handleDevices(context telebot.Context) error {
 	return nil
 }
 
-func Message(context telebot.Context) error {
-	message := context.Message()
-
-	if message.Chat.ID != config.Config.AdminId ||
-		message.Sender.ID != config.Config.AdminId {
-		logger.Log.Errorf("unauthorized user - %d - %d", message.Chat.ID, message.Sender.ID)
-		return nil
-	}
-
+func Message(context telebot.Context, cfg *config.Data) error {
 	switch context.Text() {
 	case "/start":
 		return handleStart(context)
 	case "/help":
 		return handleHelp(context)
 	case "/devices":
-		return handleDevices(context)
+		return handleDevices(context, cfg)
 	}
 
 	return nil

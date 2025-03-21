@@ -6,7 +6,8 @@ devices:
 
 bot: # telegram bot token
   token: "token from https://t.me/botfather"
-  admin_id: 1234567890
+  admins: 
+    - 1234567890
 
 settings: # application settings
   debug: true

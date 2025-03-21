@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	"gopkg.in/telebot.v4"
 	"strconv"
 	"strings"
 	"wol-e/internal/config"
 	"wol-e/internal/device"
 	"wol-e/internal/logger"
+
+	"gopkg.in/telebot.v4"
 )
 
 func handlePower(context telebot.Context, target device.Device, callback *telebot.Callback) error {
@@ -52,15 +53,8 @@ func handlePing(context telebot.Context, target device.Device, targetId int, cal
 	})
 }
 
-func Callback(context telebot.Context) error {
+func Callback(context telebot.Context, cfg *config.Data) error {
 	callback := context.Callback()
-
-	if callback.Message.Chat.ID != config.Config.AdminId ||
-		callback.Sender.ID != config.Config.AdminId {
-		logger.Log.Errorf("unauthorized user - %d - %d",
-			callback.Message.Chat.ID, callback.Sender.ID)
-		return nil
-	}
 
 	data := strings.Split(callback.Data, ":")
 	method := data[0]
@@ -73,7 +67,7 @@ func Callback(context telebot.Context) error {
 
 	var target device.Device
 	found := false
-	for i, d := range config.Config.Devices {
+	for i, d := range cfg.Devices {
 		if i != deviceId {
 			continue
 		}
