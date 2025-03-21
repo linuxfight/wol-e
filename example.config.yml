@@ -1,6 +1,5 @@
 devices:
-  main:
-    name: 'main'
+  - name: 'main'
     ip: '192.168.0.*'
     mac: 'A0:B1:C2:D3:E4:F5'
 
