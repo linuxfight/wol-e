@@ -26,7 +26,7 @@ func main() {
 		logger.Log.Panicf("error creating new bot: %v", err)
 	}
 
-	bot.Use(middleware.Whitelist())
+	bot.Use(middleware.Whitelist(cfg.AdminIds...))
 
 	bot.Handle(telebot.OnText, func(context telebot.Context) error {
 		return handlers.Message(context, cfg)
