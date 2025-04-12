@@ -2,6 +2,7 @@ package device
 
 import (
 	"fmt"
+	"github.com/go-co-op/gocron/v2"
 	probing "github.com/prometheus-community/pro-bing"
 	"net"
 	"time"
@@ -13,6 +14,7 @@ type Device struct {
 	Name string
 	Ip   string
 	Mac  string
+	Cron *[]string
 }
 
 func (d Device) GenerateBotText() string {
@@ -95,5 +97,30 @@ func (d Device) TurnOn() error {
 	}
 
 	logger.Log.Infof("Magic packet sent successfully to %s - %s", bcastAddr, d.Mac)
+	return nil
+}
+
+func (d Device) InitCron(s gocron.Scheduler) error {
+	if d.Cron == nil {
+		return nil
+	}
+
+	for _, cron := range *d.Cron {
+		_, err := s.NewJob(
+			gocron.CronJob(cron, false),
+			gocron.NewTask(func(d Device) {
+				err := d.TurnOn()
+				if err != nil {
+					logger.Log.Errorf("cron turn on error: %v", err)
+					return
+				}
+			}, d),
+		)
+		if err != nil {
+			return err
+		}
+		logger.Log.Infof("cron started: %s - \"%s\"", d.Name, cron)
+	}
+
 	return nil
 }

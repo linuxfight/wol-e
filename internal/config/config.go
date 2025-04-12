@@ -23,19 +23,19 @@ func New(configPath string) *Data {
 	viper.SetConfigFile(configPath)
 
 	if err := viper.ReadInConfig(); err != nil {
-		logger.Log.Panicf("failed to read config: %v", err)
+		logger.Log.Panic(err)
 		return nil
 	}
 
 	var devices []device.Device
 	if err := viper.UnmarshalKey("devices", &devices); err != nil {
-		logger.Log.Panicf("error unmarshaling data: %v", err)
+		logger.Log.Panic(err)
 		return nil
 	}
 
 	admins, err := getInt64Slice("bot.admins")
 	if err != nil {
-		logger.Log.Panicf("error unmarshaling data: %v", err)
+		logger.Log.Panic(err)
 		return nil
 	}
 
