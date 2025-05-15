@@ -3,8 +3,9 @@ module wol-e
 go 1.23.2
 
 require (
+	github.com/go-co-op/gocron/v2 v2.16.1
 	github.com/prometheus-community/pro-bing v0.7.0
-	github.com/spf13/cast v1.7.1
+	github.com/spf13/cast v1.8.0
 	github.com/spf13/viper v1.20.1
 	go.uber.org/zap v1.27.0
 	gopkg.in/telebot.v4 v4.0.0-beta.4
@@ -12,7 +13,6 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
-	github.com/go-co-op/gocron/v2 v2.16.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
