@@ -48,3 +48,5 @@ start_service() {
     procd_close_instance
 }
 ```
+
+Для запуска через systemd, вы можете написать свой сервис
