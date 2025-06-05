@@ -8,7 +8,7 @@ require (
 	github.com/spf13/cast v1.8.0
 	github.com/spf13/viper v1.20.1
 	go.uber.org/zap v1.27.0
-	gopkg.in/telebot.v4 v4.0.0-beta.4
+	gopkg.in/telebot.v4 v4.0.0-beta.5
 )
 
 require (
